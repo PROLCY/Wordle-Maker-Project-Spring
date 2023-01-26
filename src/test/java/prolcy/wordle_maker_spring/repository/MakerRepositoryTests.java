@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import prolcy.wordle_maker_spring.domain.Maker;
 
-import java.util.Optional;
-
 @SpringBootTest
 @Log4j2
 public class MakerRepositoryTests {

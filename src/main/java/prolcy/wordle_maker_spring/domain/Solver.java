@@ -16,8 +16,8 @@ public class Solver extends BaseEntity{
     private Long id;
     @Column(length = 20, nullable = false)
     private String nickname;
-    @Column(name = "word_list", nullable = true)
+    @Column(name = "word_list")
     private String wordList;
-    @Column(name = "key_state", nullable = true)
+    @Column(name = "key_state")
     private String keyState;
 }

@@ -10,8 +10,6 @@ public class WordService {
     private final WordRepository wordRepository;
     public boolean isExistWord(String word) {
         WordDoc wordDoc = wordRepository.findByWord(word);
-        if(wordDoc == null)
-            return false;
-        return true;
+        return wordDoc != null;
     }
 }
