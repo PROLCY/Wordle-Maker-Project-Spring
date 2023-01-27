@@ -32,6 +32,9 @@ dependencies {
 
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
+
+    implementation 'org.modelmapper:modelmapper:3.0.0'
+
 }
 
 tasks.named('test') {

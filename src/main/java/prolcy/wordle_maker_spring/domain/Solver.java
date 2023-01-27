@@ -9,11 +9,14 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(exclude = "maker")
 public class Solver extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "maker")
+    private Maker maker;
     @Column(length = 20, nullable = false)
     private String nickname;
     @Column(name = "word_list")

@@ -11,9 +11,9 @@ import javax.persistence.*;
 @NoArgsConstructor
 @ToString
 public class Maker extends BaseEntity{
-    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Id
     @Column(length = 20, nullable = false)
     private String nickname;
     @Column(length = 200, nullable = false)
