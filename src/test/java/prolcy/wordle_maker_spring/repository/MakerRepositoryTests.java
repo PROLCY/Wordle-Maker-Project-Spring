@@ -19,4 +19,22 @@ public class MakerRepositoryTests {
         Maker maker = makerRepository.findByNickname(nickname);
         log.info(maker);
     }
+    @Test
+    public void testInsert() {
+        Maker maker = Maker.builder()
+                .id(6L)
+                .nickname("testNickname")
+                .url("testUrl")
+                .correctWord("testCorrectWord")
+                .build();
+        Maker result = makerRepository.save(maker);
+        log.info(result);
+    }
+    @Test
+    public void testDelete() {
+        String nickname = "BBBBB";
+        log.info("-------testDelect()---------");
+        makerRepository.deleteByNickname(nickname);
+        log.info(makerRepository.findByNickname(nickname));
+    }
 }

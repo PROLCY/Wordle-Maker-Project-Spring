@@ -2,41 +2,30 @@ package prolcy.wordle_maker_spring.service;
 
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-import prolcy.wordle_maker_spring.domain.Solver;
 import prolcy.wordle_maker_spring.dto.SolverDTO;
-import prolcy.wordle_maker_spring.repository.SolverRepository;
 
 @SpringBootTest
 @Log4j2
 public class SolverServiceTests {
     @Autowired
-    private SolverRepository solverRepository;
-    @Autowired
-    private ModelMapper modelMapper;
+    private SolverService solverService;
     @Test
-    @Transactional
-    public void MappingTest() {
+    public void isDuplicatedNicknameTest() {
         SolverDTO solverDTO = SolverDTO.builder()
-                .id(1L)
-                .makerNickname("testMakerNickname")
-                .nickname("testNickname")
-                .wordList("testWordList")
-                .keyState("testKeyState")
+                .nickname("AAAAA")
+                .makerNickname("AAAAA")
                 .build();
-        Solver solver = modelMapper.map(solverDTO, Solver.class);
-        log.info("--------DTOToEntity------");
-        log.info(solverDTO);
-        log.info(solver);
-        log.info(solver.getMaker());
-        solver = solverRepository.findByNickname("AAAAA");
-        log.info("-------EntityToDTO-------");
-        solverDTO = modelMapper.map(solver, SolverDTO.class);
-        log.info(solver);
-        log.info(solver.getMaker());
-        log.info(solverDTO);
+        log.info(solverService.isDuplicatedNickname(solverDTO));
+    }
+    @Test
+    public void registerTest() {
+        SolverDTO solverDTO = SolverDTO.builder()
+                .nickname("testNickname")
+                .makerNickname("AAAAA")
+                .build();
+        String nickname = solverService.register(solverDTO);
+        log.info(nickname);
     }
 }

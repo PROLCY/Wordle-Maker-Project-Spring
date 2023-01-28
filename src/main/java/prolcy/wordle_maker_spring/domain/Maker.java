@@ -12,6 +12,7 @@ import javax.persistence.*;
 @ToString
 public class Maker extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(unique = true, nullable = false, insertable = false, updatable = false)
     private Long id;
     @Id
     @Column(length = 20, nullable = false)

@@ -12,6 +12,8 @@ import prolcy.wordle_maker_spring.domain.Solver;
 @Log4j2
 public class SolverRepositoryTests {
     @Autowired
+    private MakerRepository makerRepository;
+    @Autowired
     private SolverRepository solverRepository;
     @Test
     public void testSelect() {
@@ -27,5 +29,21 @@ public class SolverRepositoryTests {
         log.info("--------testSelectWithMaker()---------");
         Maker maker = solverRepository.findByNickname(nickname).getMaker();
         log.info(maker);
+    }
+    @Test
+    public void isDuplicatedNicknameTest() {
+        Maker maker = Maker.builder().nickname("AAAAA").build();
+        Solver solver = solverRepository.findByNicknameAndMaker("AAAAA", maker);
+        log.info(solver);
+    }
+    @Test
+    public void testInsert() {
+        Maker maker = makerRepository.findByNickname("AAAAA");
+        Solver solver = Solver.builder()
+                .nickname("testNickname")
+                .maker(maker)
+                .build();
+        Solver result = solverRepository.save(solver);
+        log.info(result);
     }
 }
