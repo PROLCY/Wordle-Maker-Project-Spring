@@ -12,6 +12,13 @@ public class MakerServiceTests {
     @Autowired
     private MakerService makerService;
     @Test
+    public void getUrlAndCorrectWordTest() {
+        MakerDTO makerDTO = MakerDTO.builder()
+                .nickname("AAAAA")
+                .build();
+        log.info(makerService.getUrlAndCorrectWord(makerDTO));
+    }
+    @Test
     public void registerTest() {
         MakerDTO makerDTO = MakerDTO.builder()
                 .nickname("testNickname")
