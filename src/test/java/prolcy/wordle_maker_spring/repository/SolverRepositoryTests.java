@@ -23,6 +23,14 @@ public class SolverRepositoryTests {
         log.info(solver);
     }
     @Test
+    public void testSelectByNicknameAndMakerNickname() {
+        String nickname = "QQQQQ";
+        String makerNickname = "ZZZZZ";
+        Maker maker = Maker.builder().nickname(makerNickname).build();
+        Solver solver = solverRepository.findByNicknameAndMaker(nickname, maker);
+        log.info(solver);
+    }
+    @Test
     @Transactional
     public void testSelectWithMaker() {
         String nickname = "AAAAA";

@@ -23,4 +23,10 @@ public class Solver extends BaseEntity{
     private String wordList;
     @Column(name = "key_state")
     private String keyState;
+    public void setKeyState(String keyState) {
+        this.keyState = keyState;
+    }
+    public void setWordList(String wordList) {
+        this.wordList = wordList;
+    }
 }

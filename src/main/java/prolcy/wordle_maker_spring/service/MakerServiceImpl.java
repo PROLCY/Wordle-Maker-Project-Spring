@@ -8,9 +8,6 @@ import prolcy.wordle_maker_spring.domain.Maker;
 import prolcy.wordle_maker_spring.dto.MakerDTO;
 import prolcy.wordle_maker_spring.repository.MakerRepository;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -18,12 +15,9 @@ public class MakerServiceImpl implements MakerService{
     private final MakerRepository makerRepository;
     private final ModelMapper modelMapper;
     @Override
-    public Map<String, String> getUrlAndCorrectWord(MakerDTO makerDTO) {
-        Map<String, String> result = new HashMap<>();
+    public MakerDTO getMakerDTOByNickname(MakerDTO makerDTO) {
         Maker maker = makerRepository.findByNickname(makerDTO.getNickname());
-        result.put("url", maker.getUrl());
-        result.put("correct_word", maker.getCorrectWord());
-        return result;
+        return modelMapper.map(maker, MakerDTO.class);
     }
     @Override
     public boolean isRegisteredNickname(String nickname) {
@@ -35,9 +29,5 @@ public class MakerServiceImpl implements MakerService{
         Maker maker = modelMapper.map(makerDTO, Maker.class);
         Maker result = makerRepository.save(maker);
         return result.getNickname();
-    }
-    @Override
-    public String getCorrectWord(String nickname) {
-        return makerRepository.findByNickname(nickname).getCorrectWord();
     }
 }

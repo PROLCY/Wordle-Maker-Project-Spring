@@ -32,7 +32,9 @@ public class MakerController {
             MakerDTO makerDTO = MakerDTO.builder()
                     .nickname(makerNickname)
                     .build();
-            response = makerService.getUrlAndCorrectWord(makerDTO);
+            MakerDTO result = makerService.getMakerDTOByNickname(makerDTO);
+            response.put("url", result.getUrl());
+            response.put("correct_word", result.getCorrectWord());
         }
         return response;
     }
