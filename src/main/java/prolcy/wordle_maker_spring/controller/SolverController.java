@@ -1,7 +1,6 @@
 package prolcy.wordle_maker_spring.controller;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +11,10 @@ import prolcy.wordle_maker_spring.mongodb.model.WordDoc;
 import prolcy.wordle_maker_spring.mongodb.service.WordService;
 import prolcy.wordle_maker_spring.service.MakerService;
 import prolcy.wordle_maker_spring.service.SolverService;
+import prolcy.wordle_maker_spring.gson.Parser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,9 +25,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Log4j2
 public class SolverController {
-    public final MakerService makerService;
-    public final SolverService solverService;
-    public final WordService wordService;
+    private final MakerService makerService;
+    private final SolverService solverService;
+    private final WordService wordService;
+    private final Parser parser = new Parser();
     @GetMapping("/{makerNickname}/init")
     public Map<String, String> initialize(HttpServletRequest request, @PathVariable String makerNickname) {
         Map<String, String> response = new HashMap<>();
@@ -59,8 +59,8 @@ public class SolverController {
         int listIndex;
         List<Map<String, String>> lastWord;
 
-        List<List<Map<String, String>>> wordList = parseWordList(solverDTO.getWordList());
-        Map<String, String> keyState = parseKeyState(solverDTO.getKeyState());
+        List<List<Map<String, String>>> wordList = parser.parseWordList(solverDTO.getWordList());
+        Map<String, String> keyState = parser.parseKeyState(solverDTO.getKeyState());
 
         if(wordList == null) {
             wordList = new ArrayList<>();
@@ -90,27 +90,6 @@ public class SolverController {
         response.put("nickname", nickname);
         response.put("listIndex", gson.toJson(listIndex));
         return response;
-    }
-    private List<List<Map<String, String>>> parseWordList(String json) {
-        if(json == null)
-            return null;
-        Gson gson = new Gson();
-        Type listType = new TypeToken<List<List<Map<String, String>>>>() {}.getType();
-        return gson.fromJson(json, listType);
-    }
-    private Map<String, String> parseKeyState(String json) {
-        if(json == null)
-            return null;
-        Gson gson = new Gson();
-        Type mapType = new TypeToken<Map<String, String>>() {}.getType();
-        return gson.fromJson(json, mapType);
-    }
-    private List<Map<String, String>> parseWord(String json) {
-        if(json == null)
-            return null;
-        Gson gson = new Gson();
-        Type mapType = new TypeToken<List<Map<String, String>>>() {}.getType();
-        return gson.fromJson(json, mapType);
     }
     @PostMapping("/{makerNickname}/duplicated")
     public String duplicatedNickname(@RequestBody SolverDTO solverDTO, @PathVariable String makerNickname) {
@@ -144,19 +123,6 @@ public class SolverController {
         response.put("wordCorrect", correctWord);
         return response;
     }
-    @PostMapping("/{makerNickname}/enter")
-    public ResponseEntity<Object> enter(HttpServletRequest request, @RequestBody Map<String, String> body, @PathVariable String makerNickname) {
-        String solverNickname = (String) request.getSession().getAttribute("solver");
-        String keyState = body.get("keyState");
-        SolverDTO solverDTO = SolverDTO.builder()
-                .nickname(solverNickname)
-                .makerNickname(makerNickname)
-                .keyState(keyState)
-                .build();
-        log.info("controller-----" + keyState);
-        solverService.updateKeyState(solverDTO);
-        return ResponseEntity.ok(null);
-    }
     @PostMapping("/{makerNickname}/typing")
     public ResponseEntity<Object> typing(HttpServletRequest request, @RequestBody Map<String, String> body, @PathVariable String makerNickname) {
         String solverNickname = (String) request.getSession().getAttribute("solver");
@@ -168,9 +134,10 @@ public class SolverController {
 
         String newWord = body.get("newWord");
         int listIndex = Integer.parseInt(body.get("listIndex"));
+        String keyState = body.get("keyState");
 
-        List<List<Map<String, String>>> wordList = parseWordList(solverDTO.getWordList());
-        List<Map<String, String>> word = parseWord(newWord);
+        List<List<Map<String, String>>> wordList = parser.parseWordList(solverDTO.getWordList());
+        List<Map<String, String>> word = parser.parseWord(newWord);
         if(wordList == null) {
             wordList = new ArrayList<>();
         }
@@ -183,10 +150,9 @@ public class SolverController {
 
         String newWordList = gson.toJson(wordList);
         solverDTO.setWordList(newWordList);
+        solverDTO.setKeyState(keyState);
 
-        log.info("--------solverDTO--------");
-        log.info(solverDTO);
-        solverService.updateWordList(solverDTO);
+        solverService.updateWordListAndKeyState(solverDTO);
 
         //웹소켓 추가
 

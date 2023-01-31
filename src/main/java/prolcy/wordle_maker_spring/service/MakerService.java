@@ -6,4 +6,5 @@ public interface MakerService {
     MakerDTO getMakerDTOByNickname(MakerDTO makerDTO);
     boolean isRegisteredNickname(String nickname);
     String register(MakerDTO makerDTO);
+    void deleteMaker(MakerDTO makerDTO);
 }

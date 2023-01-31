@@ -6,7 +6,9 @@ import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import prolcy.wordle_maker_spring.dto.MakerDTO;
 import prolcy.wordle_maker_spring.dto.SolverDTO;
+import prolcy.wordle_maker_spring.dto.SolversResponseDTO;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -57,8 +59,18 @@ public class SolverServiceTests {
         SolverDTO solverDTO = SolverDTO.builder()
                 .nickname("FFFFF")
                 .makerNickname("AAAAA")
-                .keyState("testKeyState3")
+                .keyState("testKeyState4")
+                .wordList("testWordList")
                 .build();
-        solverService.updateKeyState(solverDTO);
+        solverService.register(solverDTO);
+        solverService.updateWordListAndKeyState(solverDTO);
+    }
+    @Test
+    public void testGetSolvers() {
+        MakerDTO makerDTO = MakerDTO.builder()
+                .nickname("MMMMM")
+                .build();
+        List<SolversResponseDTO> solverDTOS = solverService.getSolversByMaker(makerDTO);
+        solverDTOS.forEach(log::info);
     }
 }

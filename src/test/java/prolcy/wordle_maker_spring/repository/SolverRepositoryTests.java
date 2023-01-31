@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import prolcy.wordle_maker_spring.domain.Maker;
 import prolcy.wordle_maker_spring.domain.Solver;
 
+import java.util.stream.IntStream;
+
 @SpringBootTest
 @Log4j2
 public class SolverRepositoryTests {
@@ -53,5 +55,19 @@ public class SolverRepositoryTests {
                 .build();
         Solver result = solverRepository.save(solver);
         log.info(result);
+    }
+    @Test
+    public void testSelectSolvers() {
+        IntStream.rangeClosed(1, 10).forEach(i -> {
+            Solver solver = Solver.builder()
+                    .nickname("TESTA")
+                    .maker(makerRepository.findByNickname("MMMMM"))
+                    .build();
+            solverRepository.save(solver);
+        });
+        Maker maker = Maker.builder()
+                .nickname("MMMMM")
+                .build();
+        solverRepository.findSolversByMaker(maker).forEach(log::info);
     }
 }

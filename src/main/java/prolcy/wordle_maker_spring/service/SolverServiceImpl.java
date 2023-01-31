@@ -4,11 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import prolcy.wordle_maker_spring.domain.Maker;
 import prolcy.wordle_maker_spring.domain.Solver;
+import prolcy.wordle_maker_spring.dto.MakerDTO;
 import prolcy.wordle_maker_spring.dto.SolverDTO;
+import prolcy.wordle_maker_spring.dto.SolversResponseDTO;
+import prolcy.wordle_maker_spring.gson.Parser;
 import prolcy.wordle_maker_spring.repository.SolverRepository;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +21,7 @@ import prolcy.wordle_maker_spring.repository.SolverRepository;
 public class SolverServiceImpl implements SolverService{
     private final SolverRepository solverRepository;
     private final ModelMapper modelMapper;
+    private final Parser parser = new Parser();
     @Override
     public boolean isDuplicatedNickname(SolverDTO solverDTO) {
         Maker maker = Maker.builder()
@@ -37,25 +43,51 @@ public class SolverServiceImpl implements SolverService{
         return modelMapper.map(solver, SolverDTO.class);
     }
     @Override
-    @Transactional
-    public void updateKeyState(SolverDTO solverDTO) {
+    public void updateWordListAndKeyState(SolverDTO solverDTO) {
+        log.info("-----update------");
         Maker maker = Maker.builder()
                 .nickname(solverDTO.getMakerNickname())
                 .build();
         Solver solver = solverRepository.findByNicknameAndMaker(solverDTO.getNickname(), maker);
-        solver.setKeyState(solverDTO.getKeyState());
-        log.info("service1:" + solver);
+        if(solverDTO.getKeyState() != null) {
+            solver.setKeyState(solverDTO.getKeyState());
+        }
+        solver.setWordList(solverDTO.getWordList());
         solverRepository.save(solver);
     }
     @Override
-    public void updateWordList(SolverDTO solverDTO) {
-
+    public List<SolversResponseDTO> getSolversByMaker(MakerDTO makerDTO) {
         Maker maker = Maker.builder()
-                .nickname(solverDTO.getMakerNickname())
+                .nickname(makerDTO.getNickname())
                 .build();
-        Solver solver = solverRepository.findByNicknameAndMaker(solverDTO.getNickname(), maker);
-        solver.setWordList(solverDTO.getWordList());
-        log.info("service2:" + solver);
-        solverRepository.save(solver);
+        List<SolverDTO> solverDTOS = solverRepository.findSolversByMaker(maker).stream()
+                .map(solver -> modelMapper.map(solver, SolverDTO.class))
+                .collect(Collectors.toList());
+
+        List<SolversResponseDTO> solversResponseDTOS = new ArrayList<>();
+        solverDTOS.forEach(solverDTO -> {
+            String[] solverNickname = solverDTO.getNickname().split("");
+            String wordList = solverDTO.getWordList();
+
+            List<String> nickname = new ArrayList<>(Arrays.asList(solverNickname));
+            List<Map<String, String>> mapList = nickname.stream().map(letter -> {
+                Map<String, String> map = new HashMap<>();
+                map.put("text", letter);
+                map.put("state", "filled");
+                return map;
+            }).collect(Collectors.toList());
+
+            List<List<Map<String, String>>> parsedNickname = new ArrayList<>();
+            parsedNickname.add(mapList);
+
+            List<List<Map<String, String>>> parsedWordList = wordList == null ? parser.parseWordList("[]") :parser.parseWordList(wordList);
+
+            SolversResponseDTO solversResponseDTO = SolversResponseDTO.builder()
+                    .nickname(parsedNickname)
+                    .wordList(parsedWordList)
+                    .build();
+            solversResponseDTOS.add(solversResponseDTO);
+        });
+        return solversResponseDTOS;
     }
 }

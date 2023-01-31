@@ -30,4 +30,8 @@ public class MakerServiceImpl implements MakerService{
         Maker result = makerRepository.save(maker);
         return result.getNickname();
     }
+    @Override
+    public void deleteMaker(MakerDTO makerDTO) {
+        makerRepository.deleteByNickname(makerDTO.getNickname());
+    }
 }
