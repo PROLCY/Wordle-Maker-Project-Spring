@@ -44,7 +44,6 @@ public class SolverServiceImpl implements SolverService{
     }
     @Override
     public void updateWordListAndKeyState(SolverDTO solverDTO) {
-        log.info("-----update------");
         Maker maker = Maker.builder()
                 .nickname(solverDTO.getMakerNickname())
                 .build();
@@ -66,11 +65,12 @@ public class SolverServiceImpl implements SolverService{
 
         List<SolversResponseDTO> solversResponseDTOS = new ArrayList<>();
         solverDTOS.forEach(solverDTO -> {
-            String[] solverNickname = solverDTO.getNickname().split("");
+            String[] nicknameLetters = solverDTO.getNickname().split("");
             String wordList = solverDTO.getWordList();
 
-            List<String> nickname = new ArrayList<>(Arrays.asList(solverNickname));
-            List<Map<String, String>> mapList = nickname.stream().map(letter -> {
+            List<String> nicknameLettersList = new ArrayList<>(Arrays.asList(nicknameLetters));
+
+            List<Map<String, String>> nicknameLettersObjectList = nicknameLettersList.stream().map(letter -> {
                 Map<String, String> map = new HashMap<>();
                 map.put("text", letter);
                 map.put("state", "filled");
@@ -78,7 +78,7 @@ public class SolverServiceImpl implements SolverService{
             }).collect(Collectors.toList());
 
             List<List<Map<String, String>>> parsedNickname = new ArrayList<>();
-            parsedNickname.add(mapList);
+            parsedNickname.add(nicknameLettersObjectList);
 
             List<List<Map<String, String>>> parsedWordList = wordList == null ? parser.parseWordList("[]") :parser.parseWordList(wordList);
 

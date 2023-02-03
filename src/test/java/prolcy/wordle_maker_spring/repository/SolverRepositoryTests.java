@@ -61,7 +61,7 @@ public class SolverRepositoryTests {
         IntStream.rangeClosed(1, 10).forEach(i -> {
             Solver solver = Solver.builder()
                     .nickname("TESTA")
-                    .maker(makerRepository.findByNickname("MMMMM"))
+                    .maker(makerRepository.findByNickname("CCCCC"))
                     .build();
             solverRepository.save(solver);
         });

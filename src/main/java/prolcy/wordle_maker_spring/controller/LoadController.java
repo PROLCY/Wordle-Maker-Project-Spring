@@ -50,14 +50,11 @@ public class LoadController {
         List<SolversResponseDTO> solvers = solverService.getSolversByMaker(makerDTO);
 
         Gson gson = new Gson();
-
         response.put("solvers", gson.toJson(solvers));
-        log.info(response.get("solvers"));
         return response;
     }
     @PostMapping("/exist")
     public Boolean isExistNickname(@RequestBody MakerDTO makerDTO) {
-        log.info(makerDTO);
         return makerService.isRegisteredNickname(makerDTO.getNickname());
     }
     @DeleteMapping("/delete/{makerNickname}")

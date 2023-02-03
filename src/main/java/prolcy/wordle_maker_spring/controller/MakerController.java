@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/make")
+@RequestMapping("make")
 @RequiredArgsConstructor
 @Log4j2
 public class MakerController {
@@ -40,12 +40,10 @@ public class MakerController {
     }
     @PostMapping("/duplicated")
     public String duplicatedNickname(@RequestBody MakerDTO makerDTO) {
-        log.info(makerDTO);
         return makerService.isRegisteredNickname(makerDTO.getNickname()) ? "duplicated" : "not-duplicated";
     }
     @PostMapping("/exist")
     public Map<String, Boolean> isExistWord(@RequestBody WordDoc wordDoc) {
-        log.info(wordDoc);
         Map<String, Boolean> response = new HashMap<>();
         if(wordService.isExistWord(wordDoc.getWord()))
             response.put("exist", true);
@@ -54,12 +52,12 @@ public class MakerController {
         return response;
     }
     @PostMapping("/register")
-    public String register(@RequestBody MakerDTO makerDTO, HttpSession session) {
-        String url = "testUrl"; // url 생성 추가 필요
+    public String register(HttpServletRequest request, @RequestBody MakerDTO makerDTO, HttpSession session) {
+        String url = request.getHeader("origin") + "/solve/" + makerDTO.getNickname();
         makerDTO.setUrl(url);
         String nickname = makerService.register(makerDTO);
 
-        //세션 등록 추가
+        //세션 등록
         session.setAttribute("maker", nickname);
 
         log.info("------MAKER " + nickname + " is registered----");

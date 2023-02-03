@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/solve")
+@RequestMapping("solve")
 @RequiredArgsConstructor
 @Log4j2
 public class SolverController {
@@ -38,14 +38,18 @@ public class SolverController {
             return response;
         }
         HttpSession session = request.getSession();
-        String nickname = (String) session.getAttribute("solver");
+        @SuppressWarnings("unchecked")
+        Map<String, String> solver = (Map<String, String>) session.getAttribute("solver");
+        if(solver == null)
+            solver = new HashMap<>();
+        String nickname = solver.get(makerNickname);
 
         if(nickname == null) {
             log.info("------no session -solver- --------");
             response.put("session", "null");
             return response;
         }
-        //로직 추가
+        //로직
         MakerDTO makerDTO = makerService.getMakerDTOByNickname(MakerDTO.builder()
                 .nickname(makerNickname)
                 .build());
@@ -94,12 +98,10 @@ public class SolverController {
     @PostMapping("/{makerNickname}/duplicated")
     public String duplicatedNickname(@RequestBody SolverDTO solverDTO, @PathVariable String makerNickname) {
         solverDTO.setMakerNickname(makerNickname);
-        log.info(solverDTO);
         return solverService.isDuplicatedNickname(solverDTO) ? "duplicated" : "not-duplicated";
     }
     @PostMapping("/exist")
     public Map<String, Boolean> isExistWord(@RequestBody WordDoc wordDoc) {
-        log.info(wordDoc);
         Map<String, Boolean> response = new HashMap<>();
         if(wordService.isExistWord(wordDoc.getWord()))
             response.put("exist", true);
@@ -108,7 +110,7 @@ public class SolverController {
         return response;
     }
     @PostMapping("/{makerNickname}/register")
-    public Map<String, String> register(HttpSession session, @RequestBody SolverDTO solverDTO, @PathVariable String makerNickname) {
+    public Map<String, String> register(HttpServletRequest request, HttpSession session, @RequestBody SolverDTO solverDTO, @PathVariable String makerNickname) {
         MakerDTO makerDTO = MakerDTO.builder()
                 .nickname(makerNickname)
                 .build();
@@ -117,15 +119,24 @@ public class SolverController {
         String nickname = solverService.register(solverDTO);
         log.info("------SOLVER " + nickname + " is registered----");
         //세션 등록
-        session.setAttribute("solver", nickname);
-        //웹소켓 등록
+        @SuppressWarnings("unchecked")
+        Map<String, String> solver = (Map<String, String>) request.getSession().getAttribute("solver");
+        if(solver == null)
+            solver = new HashMap<>();
+        solver.put(makerNickname, nickname);
+        session.setAttribute("solver", solver);
+
         Map<String, String> response = new HashMap<>();
         response.put("wordCorrect", correctWord);
         return response;
     }
     @PostMapping("/{makerNickname}/typing")
     public ResponseEntity<Object> typing(HttpServletRequest request, @RequestBody Map<String, String> body, @PathVariable String makerNickname) {
-        String solverNickname = (String) request.getSession().getAttribute("solver");
+        @SuppressWarnings("unchecked")
+        Map<String, String> solver = (Map<String, String>) request.getSession().getAttribute("solver");
+        if(solver == null)
+            solver = new HashMap<>();
+        String solverNickname = solver.get(makerNickname);
         SolverDTO solverDTO = SolverDTO.builder()
                 .nickname(solverNickname)
                 .makerNickname(makerNickname)
@@ -146,6 +157,7 @@ public class SolverController {
             wordList.add(word);
         else if(wordList.size() > listIndex)
             wordList.set(listIndex, word);
+
         Gson gson = new Gson();
 
         String newWordList = gson.toJson(wordList);
@@ -153,8 +165,6 @@ public class SolverController {
         solverDTO.setKeyState(keyState);
 
         solverService.updateWordListAndKeyState(solverDTO);
-
-        //웹소켓 추가
 
         return ResponseEntity.ok(null);
     }
